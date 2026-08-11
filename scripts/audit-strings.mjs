@@ -131,12 +131,9 @@ const REQUIRED = {
     "six-figure annual savings · seven-figure five-year value",
     "Underway: four phases, validated at every step",
   ],
-  /* Exhibits for this route land next; for now only its chrome is checked. */
   "work/network-study.html": [
     "Network study · Michael Bask",
     "A ten-year centralization study for a four-lab hospital network, paced by capacity triggers.",
-  ],
-  "work/network-study.pending": [
     "Four labs, four million tests", "about 4 million", "a year",
     "Four hospital labs, about four million tests a year",
     "The cost curve problem", "Staffing", "Everything else",
@@ -152,10 +149,57 @@ const REQUIRED = {
     "The payoff range", "expense per test: about",
     "tens of millions over ten years",
     "Tens of millions in ten-year savings across every scenario",
-    "Space becomes care", "42%", "38%", "about two fifths",
+    "Space becomes care", "about two fifths",
     "Two fifths of hospital lab space freed for patient care",
   ],
 };
+
+/*
+ * Strings a counter splits across elements, so they only exist once the markup
+ * is flattened. These are the sentences a visitor actually reads, which is why
+ * they are worth checking whole rather than in fragments.
+ */
+const REQUIRED_TEXT = {
+  "work/billing-strategy.html": [
+    "growing ~25% vs ~5% a year",
+    "annualized reduction: seven figures",
+    "~1,700 tests",
+    ">90% auto-matched",
+  ],
+  "work/insourcing.html": [
+    "~5,700 a year",
+    "savings: ~2% of project value",
+    "11x",
+    "startup recovered in month one",
+    "per-test analysis in minutes",
+  ],
+  "work/consolidation.html": [
+    "about 10% leaner",
+    "six-figure annual savings · seven-figure five-year value",
+  ],
+  "work/network-study.html": [
+    "about 4 million",
+    "about 5.5% a year",
+    "42%",
+    "38%",
+    "about two fifths",
+    "expense per test: about -19%",
+    "tens of millions over ten years",
+  ],
+};
+
+function visibleText(html) {
+  return html
+    .replace(/<script[\s\S]*?<\/script>/g, " ")
+    .replace(/<style[\s\S]*?<\/style>/g, " ")
+    .replace(/<[^>]+>/g, "")
+    .replace(/&#x27;/g, "'")
+    .replace(/&amp;/g, "&")
+    .replace(/&gt;/g, ">")
+    .replace(/&lt;/g, "<")
+    .replace(/&nbsp;/g, " ")
+    .replace(/\s+/g, " ");
+}
 
 /*
  * No calendar year may appear on the network study page, and no page should
@@ -203,10 +247,16 @@ for (const path of targets) {
 
 // --------------------------------------------------------- required strings
 for (const [file, strings] of Object.entries(REQUIRED)) {
-  if (file.endsWith(".pending")) continue;
   const html = readFileSync(join(HTML_ROOT, file), "utf8");
   for (const needle of strings) {
     if (!html.includes(needle)) failures.push(`${file}: missing "${needle}"`);
+  }
+}
+
+for (const [file, strings] of Object.entries(REQUIRED_TEXT)) {
+  const text = visibleText(readFileSync(join(HTML_ROOT, file), "utf8"));
+  for (const needle of strings) {
+    if (!text.includes(needle)) failures.push(`${file}: text missing "${needle}"`);
   }
 }
 
@@ -222,6 +272,7 @@ for (const [file, expected] of [
   ["work/billing-strategy.html", 7],
   ["work/insourcing.html", 7],
   ["work/consolidation.html", 6],
+  ["work/network-study.html", 7],
 ]) {
   const html = readFileSync(join(HTML_ROOT, file), "utf8");
   const found = html.split(MARKER).length - 1;

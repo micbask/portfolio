@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { PlaceholderPage } from "@/components/site/PlaceholderPage";
+import { NetworkStudyExhibits } from "@/components/work/network/NetworkStudyExhibits";
 import { ROUTES } from "@/content/site";
 
 export const metadata: Metadata = {
@@ -12,5 +12,5 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-  return <PlaceholderPage label={ROUTES.networkStudy.label} />;
+  return <NetworkStudyExhibits />;
 }
