@@ -1,0 +1,78 @@
+@import "tailwindcss";
+
+@theme {
+  --color-ground: #faf9f7;
+  --color-surface: #ffffff;
+  --color-ink: #16181a;
+  --color-ink-muted: #565d65;
+  --color-ink-faint: #8b9198;
+  --color-rule: #e4e1db;
+  --color-rule-soft: #efece7;
+  --color-accent: #2f5d62;
+  --color-accent-mid: #5d8b8c;
+  --color-accent-soft: #a8c3c1;
+  --color-accent-wash: #e7efee;
+  --color-mark: #c3c8cc;
+  --color-mark-soft: #dee1e4;
+  --color-warn: #9a6a3c;
+
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-newsreader), Georgia, "Times New Roman", serif;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background-color: var(--color-ground);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-feature-settings: "cv05" 1;
+  -webkit-font-smoothing: antialiased;
+}
+
+/*
+  Full-viewport exhibit step. The vh declaration stays as the fallback for
+  browsers without svh; svh keeps the step stable while mobile toolbars slide.
+*/
+.exhibit-step {
+  min-height: 100vh;
+  min-height: 100svh;
+}
+
+/*
+  Motion gate. The inline script in the document head adds `motion-ready` only
+  when scripting is available and the visitor has not asked for reduced motion,
+  so a no-JS or reduced-motion visitor is served the finished exhibit with
+  nothing hidden. `motion-failed` is the escape hatch: if timeline setup throws,
+  everything is revealed rather than left blank.
+*/
+.motion-ready [data-anim] {
+  visibility: hidden;
+}
+
+.motion-ready.motion-failed [data-anim] {
+  visibility: visible !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-anim] {
+    visibility: visible !important;
+  }
+}
+
+.tnum {
+  font-variant-numeric: tabular-nums;
+}
+
+::selection {
+  background-color: var(--color-accent-wash);
+}
+
+a:focus-visible,
+button:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
