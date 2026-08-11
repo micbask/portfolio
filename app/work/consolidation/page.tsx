@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { PlaceholderPage } from "@/components/site/PlaceholderPage";
+import { ConsolidationExhibits } from "@/components/work/consolidation/ConsolidationExhibits";
 import { ROUTES } from "@/content/site";
 
 export const metadata: Metadata = {
@@ -12,5 +12,5 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-  return <PlaceholderPage label={ROUTES.consolidation.label} />;
+  return <ConsolidationExhibits />;
 }

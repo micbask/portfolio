@@ -25,8 +25,12 @@ const BANNED = [
   // Sibling apps that must never be named or linked here.
   "labdash", "clearpath", "chequemate", "clerk.micbask",
   // Clinical and regulatory vocabulary the positioning rules exclude.
+  // Not listed: the section names the spec itself puts on the consolidation and
+  // network pages as exhibit labels (chemistry, hematology, coagulation,
+  // urinalysis, cultures, blood counts). The spec fixes those words, so they
+  // are checked as required strings below rather than banned here.
   "assay", "analyzer", "analyser", "specimen", "phlebotom", "accreditation",
-  "clia", "cap-accredited", "histolog", "patholog", "immunoassay", "hematolog",
+  "clia", "cap-accredited", "histolog", "patholog", "immunoassay",
   "molecular diagnostic", "hla ",
 ];
 
@@ -108,12 +112,56 @@ const REQUIRED = {
   "work/consolidation.html": [
     "Consolidation · Michael Bask",
     "Two duplicate hospital labs consolidated into one near-capacity core, about ten percent leaner.",
+    "Two labs, a short walk apart", "Site A", "Site B",
+    "Two hospital labs ran the same tests, a short walk apart",
+    "Machines standing idle", "chemistry line", "hematology line",
+    "coagulation", "urinalysis", "legacy testing line", "0%",
+    "Capacity ran far below its potential at both sites",
+    "One core, one specialty", "around-the-clock core", "specialty testing",
+    "blood counts", "special chemistry", "cultures",
+    "pickups every 15 minutes",
+    "Routine volume to one site, specialty focus at the other",
+    "Fewer hands, same coverage", "Day", "Evening", "Overnight", "Weekend",
+    "leaner",
+    "Staffing redeployed, about ten percent leaner, coverage unchanged",
+    "Utilization doubles",
+    "Consolidated equipment runs near capacity instead of idling",
+    "In motion", "Prepare backup capacity", "Validate", "Move equipment",
+    "Reallocate volume",
+    "six-figure annual savings · seven-figure five-year value",
+    "Underway: four phases, validated at every step",
   ],
+  /* Exhibits for this route land next; for now only its chrome is checked. */
   "work/network-study.html": [
     "Network study · Michael Bask",
     "A ten-year centralization study for a four-lab hospital network, paced by capacity triggers.",
   ],
+  "work/network-study.pending": [
+    "Four labs, four million tests", "about 4 million", "a year",
+    "Four hospital labs, about four million tests a year",
+    "The cost curve problem", "Staffing", "Everything else",
+    "Staffing costs compounding three times faster than everything else",
+    "Three years from the wall", "blood counts", "chemistry panels", "cultures",
+    "limit: people, ~3 years", "limit: space, now",
+    "Core sections were three years from their limits",
+    "Stay for speed, move for scale", "urgency", "volume", "platform",
+    "rapid-response labs", "urgent work stays", "central hub",
+    "Every test scored: stay for speed, or move for scale",
+    "A decade-long ramp", "range reflects capacity triggers",
+    "Volume shifts on capacity triggers, not calendar dates",
+    "The payoff range", "expense per test: about",
+    "tens of millions over ten years",
+    "Tens of millions in ten-year savings across every scenario",
+    "Space becomes care", "42%", "38%", "about two fifths",
+    "Two fifths of hospital lab space freed for patient care",
+  ],
 };
+
+/*
+ * No calendar year may appear on the network study page, and no page should
+ * carry a stray four-digit year in visible text.
+ */
+const YEAR_PATTERN = /\b(19|20)\d{2}\b/;
 
 const FOOTER =
   "All artifacts on this site are recreations of real work with disguised figures. No confidential data appears here. The dashboard demo runs entirely on synthetic data.";
@@ -155,6 +203,7 @@ for (const path of targets) {
 
 // --------------------------------------------------------- required strings
 for (const [file, strings] of Object.entries(REQUIRED)) {
+  if (file.endsWith(".pending")) continue;
   const html = readFileSync(join(HTML_ROOT, file), "utf8");
   for (const needle of strings) {
     if (!html.includes(needle)) failures.push(`${file}: missing "${needle}"`);
@@ -172,12 +221,23 @@ for (const path of walk(HTML_ROOT).filter((p) => p.endsWith(".html"))) {
 for (const [file, expected] of [
   ["work/billing-strategy.html", 7],
   ["work/insourcing.html", 7],
+  ["work/consolidation.html", 6],
 ]) {
   const html = readFileSync(join(HTML_ROOT, file), "utf8");
   const found = html.split(MARKER).length - 1;
   if (found !== expected) {
     failures.push(`${file}: ${found} "${MARKER}" markers, expected ${expected}`);
   }
+}
+
+// ------------------------------------------------- no calendar years on screen
+for (const file of ["work/network-study.html", "work/consolidation.html"]) {
+  const text = readFileSync(join(HTML_ROOT, file), "utf8")
+    .replace(/<script[\s\S]*?<\/script>/g, "")
+    .replace(/<style[\s\S]*?<\/style>/g, "")
+    .replace(/<[^>]+>/g, " ");
+  const year = text.match(YEAR_PATTERN);
+  if (year) failures.push(`${file}: calendar year "${year[0]}" in visible text`);
 }
 
 if (failures.length) {
